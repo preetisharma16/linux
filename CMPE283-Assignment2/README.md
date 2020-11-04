@@ -39,7 +39,7 @@ Building The Kernel
     
 Install inner VM with 4 CPU and 20GB memory.
 
-Following commands are executed
+Inner VM can be created with the help of Following commands
 
  ![image 1](./temp/innerVM.png?raw=true )
  
