@@ -36,3 +36,11 @@ Building The Kernel
     uname -a   (kernal version is updated)
     
     ![image 1](./temp/uname.png?raw=true )
+    
+Install inner VM with following commands
+ ![image 1](./temp/innerVM.png?raw=true )
+ 
+ ![image 1](./temp/innervm1.png?raw=true )
+ 
+ ![image 1](./temp/cpuid-output.png?raw=true )
+
