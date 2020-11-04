@@ -42,7 +42,8 @@ Install inner VM with following commands
  
  ![image 1](./temp/innervm1.png?raw=true )
  
- Open Terminal in the inner VM and call cpuid code
+ Open Terminal in the inner VM and call cpuid code with 
+ cpuid -l 0x4fffffff
  
  ![image 1](./temp/cpuid-output.png?raw=true )
 
