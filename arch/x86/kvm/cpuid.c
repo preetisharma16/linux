@@ -24,6 +24,16 @@
 #include "trace.h"
 #include "pmu.h"
 
+static atomic_t exits,exits_per_reason[62];
+static atomic64_t exits_time,exits_time_per_reason[62];
+
+void add_exit_time_per_reason(u32 exit_reason,u64 time_taken);
+
+/*cmpe283
+*atomic_t exits;
+
+EXPORT_SYMBOL(exits);*/
+
 /*
  * Unlike "struct cpuinfo_x86.x86_capability", kvm_cpu_caps doesn't need to be
  * aligned to sizeof(unsigned long) because it's not accessed via bitops.
@@ -1108,6 +1118,27 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
+     /*cmpe283 code changes start */
+	if(eax  ==  0x4fffffff){
+	    eax = atomic_read(&exits);
+	printk("ALL , ExitCount : %u\n",eax); 
+	}else if(eax  ==  0x4ffffffe){
+        ebx = ( (atomic64_read(&exits_time) >> 32) );
+        ecx = ( (atomic64_read(&exits_time) & 0xFFFFFFFF ));	    
+        }else if(eax  ==  0x4ffffffd){
+            if(ecx >= 0 && ecx < 62)	    
+            eax = atomic_read(&exits_per_reason[(int)ecx]);
+	    printk("EXIT_REASON : %d , ExitCount : %u\n",(int)ecx,eax);
+	}else if(eax  ==  0x4ffffffc){
+              if(ecx >= 0 && ecx < 62){        
+              ebx = ( (atomic64_read(&exits_time_per_reason[(int)ecx]) >> 32) );
+	      ecx = ( (atomic64_read(&exits_time_per_reason[(int)ecx]) & 0xFFFFFFFF ));
+              }	    
+        }
+        else{
+	    kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, true);
+	}
+	/*cmpe283 code changes end*/
 	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	kvm_rax_write(vcpu, eax);
 	kvm_rbx_write(vcpu, ebx);
@@ -1116,3 +1147,4 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	return kvm_skip_emulated_instruction(vcpu);
 }
 EXPORT_SYMBOL_GPL(kvm_emulate_cpuid);
+EXPORT_SYMBOL_GPL(add_exit_time_per_reason);
