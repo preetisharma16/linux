@@ -3058,11 +3058,18 @@ static void svm_get_exit_info(struct kvm_vcpu *vcpu, u64 *info1, u64 *info2,
 		*error_code = 0;
 }
 
+/* cmpe283 */
+
+void add_exit_time_per_reason(u32 exit_reason,u64 time_taken);
+
 static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 {
 	struct vcpu_svm *svm = to_svm(vcpu);
 	struct kvm_run *kvm_run = vcpu->run;
 	u32 exit_code = svm->vmcb->control.exit_code;
+        u32 exit_reason = kvm_run->exit_reason; 
+        u64 timer;
+        int temp;
 
 	trace_kvm_exit(exit_code, vcpu, KVM_ISA_SVM);
 
@@ -3108,6 +3115,16 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 
 	if (exit_code >= ARRAY_SIZE(svm_exit_handlers)
 	    || !svm_exit_handlers[exit_code]) {
+        /*cmpe283 */
+        if (exit_reason < ARRAY_SIZE(svm_exit_handlers)
+	    && svm_exit_handlers[exit_reason]){
+		timer = rdtsc();
+        temp = svm_exit_handlers[exit_reason](svm);
+        timer = rdtsc() - timer;
+        add_exit_time_per_reason(exit_reason,timer);
+        return temp;
+        }
+        else{
 		vcpu_unimpl(vcpu, "svm: unexpected exit reason 0x%x\n", exit_code);
 		dump_vmcb(vcpu);
 		vcpu->run->exit_reason = KVM_EXIT_INTERNAL_ERROR;
@@ -3117,6 +3134,7 @@ static int handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		vcpu->run->internal.data[0] = exit_code;
 		vcpu->run->internal.data[1] = vcpu->arch.last_vmentry_cpu;
 		return 0;
+        }
 	}
 
 #ifdef CONFIG_RETPOLINE
