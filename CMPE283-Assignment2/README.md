@@ -38,7 +38,9 @@ Building The Kernel
     ![image 1](./temp/uname.png?raw=true )
     
 Install inner VM with 4 CPU and 20GB memory.
+
 Following commands are executed
+
  ![image 1](./temp/innerVM.png?raw=true )
  
  ![image 1](./temp/innervm1.png?raw=true )
